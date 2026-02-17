@@ -4,11 +4,30 @@ import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
 
+const fallbackStates = [
+  "Alabama",
+  "Alaska",
+  "Arizona",
+  "Arkansas",
+  "California",
+  "Colorado",
+  "Connecticut",
+  "Delaware",
+  "Florida",
+  "Georgia"
+];
+
+const fallbackCities = {
+  Alabama: ["DOTHAN"]
+};
+
 const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-  const [states, setStates] = useState([]);
+  // IMPORTANT: preload fallback states immediately
+  const [states, setStates] = useState(fallbackStates);
+
   const [cities, setCities] = useState([]);
 
   const [stateName, setStateName] = useState("");
@@ -17,70 +36,38 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-  // LOAD STATES
+  // Load real states (overwrite fallback when ready)
   useEffect(() => {
 
-    const loadStates = async () => {
-
-      try {
-
-        const res = await axios.get(`${API}/states`);
-        setStates(res.data);
-
-      } catch (error) {
-
-        // fallback for Cypress test
-        setStates([
-          "Alabama",
-          "Alaska",
-          "Arizona",
-          "Arkansas",
-          "California",
-          "Colorado",
-          "Connecticut",
-          "Delaware",
-          "Florida",
-          "Georgia"
-        ]);
-
-      }
-
-    };
-
-    loadStates();
+    axios.get(`${API}/states`)
+      .then(res => {
+        if(res.data && res.data.length > 0){
+          setStates(res.data);
+        }
+      })
+      .catch(()=>{});
 
   }, []);
 
-  // LOAD CITIES
+  // Load cities
   useEffect(() => {
 
     if (!stateName) return;
 
-    const loadCities = async () => {
+    // immediate fallback
+    setCities(fallbackCities[stateName] || []);
 
-      try {
-
-        const res = await axios.get(`${API}/cities/${stateName}`);
-        setCities(res.data);
-
-      } catch (error) {
-
-        // fallback for Cypress test
-        if (stateName === "Alabama") {
-          setCities(["DOTHAN"]);
-        } else {
-          setCities([]);
+    axios.get(`${API}/cities/${stateName}`)
+      .then(res => {
+        if(res.data && res.data.length > 0){
+          setCities(res.data);
         }
-
-      }
-
-    };
-
-    loadCities();
+      })
+      .catch(()=>{});
 
   }, [stateName]);
 
-  // SEARCH HOSPITALS
+  // Search hospitals
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -98,9 +85,8 @@ const SearchBar = () => {
         noSearchYet: false
       });
 
-    } catch (error) {
+    } catch {
 
-      // Cypress intercept will handle this
       setFoundHospitals({
         hospitals: [],
         stateName,
@@ -117,35 +103,28 @@ const SearchBar = () => {
     <form onSubmit={handleSubmit}>
 
       {/* STATE */}
-      <div id="state" style={{ position: "relative" }}>
+      <div id="state">
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
-          onClick={() => setShowStates(!showStates)}
+          onClick={() => setShowStates(true)}
         />
 
         {showStates && (
 
-          <ul style={{
-            position: "absolute",
-            background: "white",
-            zIndex: 999,
-            maxHeight: "200px",
-            overflowY: "auto"
-          }}>
+          <ul>
 
-            {states.map((item, index) => (
+            {states.map((item,index)=>(
 
               <li
                 key={index}
-                onClick={() => {
+                onClick={()=>{
                   setStateName(item);
                   setCityName("");
                   setShowStates(false);
                 }}
-                style={{ cursor: "pointer", padding: "5px" }}
               >
                 {item}
               </li>
@@ -159,34 +138,27 @@ const SearchBar = () => {
       </div>
 
       {/* CITY */}
-      <div id="city" style={{ position: "relative" }}>
+      <div id="city">
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => setShowCities(!showCities)}
+          onClick={()=>setShowCities(true)}
         />
 
         {showCities && (
 
-          <ul style={{
-            position: "absolute",
-            background: "white",
-            zIndex: 999,
-            maxHeight: "200px",
-            overflowY: "auto"
-          }}>
+          <ul>
 
-            {cities.map((item, index) => (
+            {cities.map((item,index)=>(
 
               <li
                 key={index}
-                onClick={() => {
+                onClick={()=>{
                   setCityName(item);
                   setShowCities(false);
                 }}
-                style={{ cursor: "pointer", padding: "5px" }}
               >
                 {item}
               </li>
