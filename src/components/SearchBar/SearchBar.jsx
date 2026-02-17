@@ -18,23 +18,35 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
+  // LOAD STATES IMMEDIATELY
   useEffect(() => {
 
-    axios.get(`${API}/states`)
-      .then(res => {
-        setStates(res.data);
-      });
+    const loadStates = async () => {
+
+      const res = await axios.get(`${API}/states`);
+
+      setStates(res.data);
+
+    };
+
+    loadStates();
 
   }, []);
 
+  // LOAD CITIES
   useEffect(() => {
 
     if(stateName){
 
-      axios.get(`${API}/cities/${stateName}`)
-        .then(res => {
-          setCities(res.data);
-        });
+      const loadCities = async () => {
+
+        const res = await axios.get(`${API}/cities/${stateName}`);
+
+        setCities(res.data);
+
+      };
+
+      loadCities();
 
     }
 
@@ -62,20 +74,16 @@ const SearchBar = () => {
     <form onSubmit={handleSubmit}>
 
       {/* STATE */}
-      <div
-        id="state"
-        onClick={() => setShowStates(true)}
-        style={{ position: "relative" }}
-      >
+      <div id="state">
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
+          onClick={() => setShowStates(true)}
         />
 
-        {/* IMPORTANT: ALWAYS render UL when showStates true */}
-        {showStates && states.length > 0 && (
+        {showStates && (
 
           <SearchPop
             locations={states}
@@ -90,19 +98,16 @@ const SearchBar = () => {
       </div>
 
       {/* CITY */}
-      <div
-        id="city"
-        onClick={() => setShowCities(true)}
-        style={{ position: "relative" }}
-      >
+      <div id="city">
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
+          onClick={() => setShowCities(true)}
         />
 
-        {showCities && cities.length > 0 && (
+        {showCities && (
 
           <SearchPop
             locations={cities}

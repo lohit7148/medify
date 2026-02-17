@@ -2,28 +2,17 @@ import React from "react";
 
 const SearchPop = ({ locations, clickFunction }) => {
 
+  if(!locations) return null;
+
   return (
 
-    <ul style={{
-      position: "absolute",
-      background: "white",
-      zIndex: 999,
-      listStyle: "none",
-      padding: "0",
-      margin: "0",
-      width: "100%",
-      border: "1px solid #ccc"
-    }}>
+    <ul>
 
-      {locations.map((item, index) => (
+      {locations.map((item,index) => (
 
         <li
           key={index}
           onClick={() => clickFunction(item)}
-          style={{
-            padding: "8px",
-            cursor: "pointer"
-          }}
         >
           {item}
         </li>
