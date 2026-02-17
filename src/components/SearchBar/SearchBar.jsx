@@ -21,7 +21,9 @@ const SearchBar = () => {
   useEffect(() => {
 
     axios.get(`${API}/states`)
-      .then(res => setStates(res.data));
+      .then(res => {
+        setStates(res.data);
+      });
 
   }, []);
 
@@ -30,7 +32,9 @@ const SearchBar = () => {
     if(stateName){
 
       axios.get(`${API}/cities/${stateName}`)
-        .then(res => setCities(res.data));
+        .then(res => {
+          setCities(res.data);
+        });
 
     }
 
@@ -57,10 +61,11 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      {/* STATE DROPDOWN */}
+      {/* STATE */}
       <div
         id="state"
         onClick={() => setShowStates(true)}
+        style={{ position: "relative" }}
       >
 
         <input
@@ -69,22 +74,26 @@ const SearchBar = () => {
           readOnly
         />
 
-        {showStates && (
+        {/* IMPORTANT: ALWAYS render UL when showStates true */}
+        {showStates && states.length > 0 && (
+
           <SearchPop
             locations={states}
-            clickFunction={(state)=>{
+            clickFunction={(state) => {
               setStateName(state);
               setShowStates(false);
             }}
           />
+
         )}
 
       </div>
 
-      {/* CITY DROPDOWN */}
+      {/* CITY */}
       <div
         id="city"
         onClick={() => setShowCities(true)}
+        style={{ position: "relative" }}
       >
 
         <input
@@ -93,22 +102,21 @@ const SearchBar = () => {
           readOnly
         />
 
-        {showCities && (
+        {showCities && cities.length > 0 && (
+
           <SearchPop
             locations={cities}
-            clickFunction={(city)=>{
+            clickFunction={(city) => {
               setCityName(city);
               setShowCities(false);
             }}
           />
+
         )}
 
       </div>
 
-      <button
-        id="searchBtn"
-        type="submit"
-      >
+      <button id="searchBtn" type="submit">
         Search
       </button>
 
