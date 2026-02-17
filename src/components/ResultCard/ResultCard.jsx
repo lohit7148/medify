@@ -1,142 +1,98 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState } from "react";
 import "./ResultCard.css";
 import hospitalImg from "../../assets/hospitalCircle.svg";
 import likeIcon from "../../assets/like.svg";
-import Slots from '../Slots/Slots';
-import { BookingsContext } from '../../contexts/AllContexts';
+import Button from "../Button/Button";
+import Slots from "../Slots/Slots";
+import { BookingsContext } from "../../contexts/AllContexts";
 
-const ResultCard = props => {
+const ResultCard = (props) => {
 
-    const {
+  const {
+    hospitalName,
+    county,
+    city,
+    rating,
+    hospitalType,
+    atBookingsPage,
+    bookedDate,
+    bookedTime
+  } = props;
 
-        hospitalName,
+  const [bookings, setBookings] = useContext(BookingsContext);
 
-        county,
+  const [slotsON, setSlotsON] = useState(false);
 
-        city,
+  const [dateTime, setDateTime] = useState({
+    date: "",
+    time: ""
+  });
 
-        rating,
+  const handleBooking = () => {
 
-        hospitalType,
+    if(atBookingsPage) return;
 
-        atBookingsPage,
+    if(!slotsON){
+      setSlotsON(true);
+      return;
+    }
 
-        bookedDate,
+    if(!dateTime.date || !dateTime.time){
+      return;
+    }
 
-        bookedTime
-
-    } = props;
-
-    const [bookings,setBookings]=useContext(BookingsContext);
-
-    const [dateTime,setDateTime]=useState({date:"",time:""});
-
-    const [slotsON,setSlotsON]=useState(false);
-
-    const handleBooking=()=>{
-
-        if(atBookingsPage)return;
-
-        if(!slotsON){
-
-            setSlotsON(true);
-
-            return;
-
-        }
-
-        if(!dateTime.date||!dateTime.time){
-
-            alert("Select Slot");
-
-            return;
-
-        }
-
-        const newBooking={
-
-            hospitalName,
-
-            county,
-
-            city,
-
-            rating,
-
-            hospitalType,
-
-            dateTime
-
-        };
-
-        const existing=
-
-            JSON.parse(localStorage.getItem("bookings"))||[];
-
-        const updated=[...existing,newBooking];
-
-        localStorage.setItem(
-
-            "bookings",
-
-            JSON.stringify(updated)
-
-        );
-
-        setBookings(updated);
-
+    const newBooking = {
+      hospitalName,
+      city,
+      county,
+      rating,
+      hospitalType,
+      dateTime
     };
 
-    return(
+    const existing =
+      JSON.parse(localStorage.getItem("bookings")) || [];
 
-        <div>
+    const updated = [...existing,newBooking];
 
-            <h3>{hospitalName}</h3>
+    localStorage.setItem("bookings",JSON.stringify(updated));
 
-            <p>{county},{city}</p>
+    setBookings(updated);
 
-            <p>{rating}</p>
+  };
 
-            {!atBookingsPage&&(
+  const slotClick = (date,time)=>{
+    setDateTime({date,time});
+  };
 
-                <button onClick={handleBooking}>
+  return (
 
-                    Book FREE Center Visit
+    <div>
 
-                </button>
+      <h3>{hospitalName}</h3>
 
-            )}
+      <Button
+        clickFuntion={handleBooking}
+        text="Book FREE Center Visit"
+      />
 
-            {atBookingsPage&&(
+      <Slots
+        slotsON={slotsON}
+        slotClick={slotClick}
+        dateTime={dateTime}
+      />
 
-                <>
+      {atBookingsPage && (
+        <>
+          <p>{bookedDate}</p>
+          <p>{bookedTime}</p>
+        </>
+      )}
 
-                    <p>{bookedDate}</p>
+    </div>
 
-                    <p>{bookedTime}</p>
+  );
 
-                </>
+};
 
-            )}
-
-            <Slots
-
-                slotsON={slotsON}
-
-                slotClick={(date,time)=>
-
-                    setDateTime({date,time})
-
-                }
-
-                dateTime={dateTime}
-
-            />
-
-        </div>
-
-    )
-
-}
-
-export default ResultCard
+export default ResultCard;

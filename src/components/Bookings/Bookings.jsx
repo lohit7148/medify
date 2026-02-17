@@ -1,55 +1,52 @@
-import React,{useContext,useEffect} from 'react';
-import {BookingsContext} from '../../contexts/AllContexts';
-import ResultCard from '../ResultCard/ResultCard';
+import React, { useContext, useEffect } from "react";
+import { BookingsContext } from "../../contexts/AllContexts";
+import ResultCard from "../ResultCard/ResultCard";
 
-const Bookings=()=>{
+const Bookings = () => {
 
-    const [bookings,setBookings]=useContext(BookingsContext);
+  const [bookings, setBookings] = useContext(BookingsContext);
 
-    useEffect(()=>{
+  useEffect(()=>{
 
-        const saved=
+    const saved =
+      JSON.parse(localStorage.getItem("bookings")) || [];
 
-            JSON.parse(localStorage.getItem("bookings"))||[];
+    setBookings(saved);
 
-        setBookings(saved);
+  },[]);
 
-    },[]);
+  return (
 
-    return(
+    <div>
 
-        <div>
+      <h1>My Bookings</h1>
 
-            {bookings.map((item,i)=>(
+      {bookings.map((item,index)=>(
 
-                <ResultCard
+        <ResultCard
+          key={index}
+          hospitalName={
+            item.hospitalName ||
+            item["Hospital Name"]
+          }
+          city={item.city || item["City"]}
+          atBookingsPage={true}
+          bookedDate={
+            item.dateTime?.date ||
+            item.bookingDate
+          }
+          bookedTime={
+            item.dateTime?.time ||
+            item.bookingTime
+          }
+        />
 
-                    key={i}
+      ))}
 
-                    hospitalName={item.hospitalName}
+    </div>
 
-                    county={item.county}
+  );
 
-                    city={item.city}
+};
 
-                    rating={item.rating}
-
-                    hospitalType={item.hospitalType}
-
-                    atBookingsPage={true}
-
-                    bookedDate={item.dateTime.date}
-
-                    bookedTime={item.dateTime.time}
-
-                />
-
-            ))}
-
-        </div>
-
-    )
-
-}
-
-export default Bookings
+export default Bookings;
