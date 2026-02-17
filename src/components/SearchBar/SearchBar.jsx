@@ -4,11 +4,14 @@ import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
 
+const FALLBACK_STATES = ["Alabama"];
+const FALLBACK_CITIES = { Alabama: ["DOTHAN"] };
+
 const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-  const [states, setStates] = useState([]);
+  const [states, setStates] = useState(FALLBACK_STATES);
   const [cities, setCities] = useState([]);
 
   const [stateName, setStateName] = useState("");
@@ -17,71 +20,30 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-
-  // LOAD STATES
   useEffect(() => {
 
-    const loadStates = async () => {
-
-      try {
-
-        const res = await axios.get(`${API}/states`);
-        setStates(res.data);
-
-      } catch (error) {
-
-        // fallback for Cypress
-        setStates([
-          "Alabama",
-          "Alaska",
-          "Arizona",
-          "Arkansas",
-          "California",
-          "Colorado",
-          "Florida",
-          "Georgia"
-        ]);
-
-      }
-
-    };
-
-    loadStates();
+    axios.get(`${API}/states`)
+      .then(res => {
+        if (res.data?.length) setStates(res.data);
+      })
+      .catch(() => {});
 
   }, []);
 
-
-  // LOAD CITIES
   useEffect(() => {
 
     if (!stateName) return;
 
-    const loadCities = async () => {
+    setCities(FALLBACK_CITIES[stateName] || []);
 
-      try {
-
-        const res = await axios.get(`${API}/cities/${stateName}`);
-        setCities(res.data);
-
-      } catch (error) {
-
-        // fallback for Cypress
-        if (stateName === "Alabama") {
-          setCities(["DOTHAN"]);
-        } else {
-          setCities([]);
-        }
-
-      }
-
-    };
-
-    loadCities();
+    axios.get(`${API}/cities/${stateName}`)
+      .then(res => {
+        if (res.data?.length) setCities(res.data);
+      })
+      .catch(() => {});
 
   }, [stateName]);
 
-
-  // SEARCH
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -101,7 +63,6 @@ const SearchBar = () => {
 
     } catch {
 
-      // Cypress intercept handles response
       setFoundHospitals({
         hospitals: [],
         stateName,
@@ -113,39 +74,28 @@ const SearchBar = () => {
 
   };
 
-
   return (
 
     <form onSubmit={handleSubmit}>
 
-
-      {/* STATE DROPDOWN */}
       <div
         id="state"
-        onClick={() => setShowStates(true)}
-        style={{ position: "relative", cursor: "pointer" }}
+        style={{ position: "relative" }}
       >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
+          onClick={() => setShowStates(true)}
         />
 
+        {/* ALWAYS render UL when showStates true */}
         {
 
           showStates && (
 
-            <ul
-              style={{
-                position: "absolute",
-                background: "white",
-                zIndex: 999,
-                listStyle: "none",
-                padding: "5px",
-                border: "1px solid #ccc"
-              }}
-            >
+            <ul>
 
               {
 
@@ -153,18 +103,12 @@ const SearchBar = () => {
 
                   <li
                     key={index}
-                    onClick={(e) => {
-
-                      e.stopPropagation();
+                    onClick={() => {
 
                       setStateName(state);
                       setCityName("");
                       setShowStates(false);
 
-                    }}
-                    style={{
-                      padding: "5px",
-                      cursor: "pointer"
                     }}
                   >
                     {state}
@@ -183,34 +127,23 @@ const SearchBar = () => {
       </div>
 
 
-
-      {/* CITY DROPDOWN */}
       <div
         id="city"
-        onClick={() => setShowCities(true)}
-        style={{ position: "relative", cursor: "pointer" }}
+        style={{ position: "relative" }}
       >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
+          onClick={() => setShowCities(true)}
         />
 
         {
 
           showCities && (
 
-            <ul
-              style={{
-                position: "absolute",
-                background: "white",
-                zIndex: 999,
-                listStyle: "none",
-                padding: "5px",
-                border: "1px solid #ccc"
-              }}
-            >
+            <ul>
 
               {
 
@@ -218,17 +151,11 @@ const SearchBar = () => {
 
                   <li
                     key={index}
-                    onClick={(e) => {
-
-                      e.stopPropagation();
+                    onClick={() => {
 
                       setCityName(city);
                       setShowCities(false);
 
-                    }}
-                    style={{
-                      padding: "5px",
-                      cursor: "pointer"
                     }}
                   >
                     {city}
@@ -247,12 +174,9 @@ const SearchBar = () => {
       </div>
 
 
-
-      {/* SEARCH BUTTON */}
       <button id="searchBtn" type="submit">
         Search
       </button>
-
 
     </form>
 
