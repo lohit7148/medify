@@ -17,28 +17,22 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-  // Load states
   useEffect(() => {
     axios.get(`${API}/states`)
       .then(res => setStates(res.data))
       .catch(() => {});
   }, []);
 
-  // Load cities
   useEffect(() => {
-    if(stateName){
+    if (stateName) {
       axios.get(`${API}/cities/${stateName}`)
         .then(res => setCities(res.data))
         .catch(() => {});
     }
   }, [stateName]);
 
-  // Submit search
   const handleSubmit = async (e) => {
-
     e.preventDefault();
-
-    if(!stateName || !cityName) return;
 
     const res = await axios.get(
       `${API}/data?state=${stateName}&city=${cityName}`
@@ -50,21 +44,22 @@ const SearchBar = () => {
       cityName,
       noSearchYet: false
     });
-
   };
 
   return (
-
     <form onSubmit={handleSubmit}>
 
-      {/* STATE DROPDOWN */}
-      <div id="state" style={{ position: "relative" }}>
+      {/* STATE */}
+      <div
+        id="state"
+        style={{ position: "relative" }}
+        onClick={() => setShowStates(true)}
+      >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
-          onClick={() => setShowStates(true)}
         />
 
         {showStates && (
@@ -75,14 +70,14 @@ const SearchBar = () => {
             listStyle: "none",
             padding: "0",
             margin: "0",
-            width: "100%",
             border: "1px solid #ccc"
           }}>
             {states.map((item, index) => (
               <li
                 key={index}
                 style={{ padding: "8px", cursor: "pointer" }}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setStateName(item);
                   setShowStates(false);
                   setCityName("");
@@ -97,14 +92,17 @@ const SearchBar = () => {
       </div>
 
 
-      {/* CITY DROPDOWN */}
-      <div id="city" style={{ position: "relative", marginTop: "10px" }}>
+      {/* CITY */}
+      <div
+        id="city"
+        style={{ position: "relative" }}
+        onClick={() => stateName && setShowCities(true)}
+      >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => stateName && setShowCities(true)}
         />
 
         {showCities && (
@@ -115,14 +113,14 @@ const SearchBar = () => {
             listStyle: "none",
             padding: "0",
             margin: "0",
-            width: "100%",
             border: "1px solid #ccc"
           }}>
             {cities.map((item, index) => (
               <li
                 key={index}
                 style={{ padding: "8px", cursor: "pointer" }}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   setCityName(item);
                   setShowCities(false);
                 }}
