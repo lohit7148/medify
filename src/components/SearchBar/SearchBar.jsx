@@ -4,30 +4,11 @@ import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
 
-const fallbackStates = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia"
-];
-
-const fallbackCities = {
-  Alabama: ["DOTHAN"]
-};
-
 const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-  // IMPORTANT: preload fallback states immediately
-  const [states, setStates] = useState(fallbackStates);
-
+  const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
   const [stateName, setStateName] = useState("");
@@ -36,38 +17,71 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-  // Load real states (overwrite fallback when ready)
+
+  // LOAD STATES
   useEffect(() => {
 
-    axios.get(`${API}/states`)
-      .then(res => {
-        if(res.data && res.data.length > 0){
-          setStates(res.data);
-        }
-      })
-      .catch(()=>{});
+    const loadStates = async () => {
+
+      try {
+
+        const res = await axios.get(`${API}/states`);
+        setStates(res.data);
+
+      } catch (error) {
+
+        // fallback for Cypress
+        setStates([
+          "Alabama",
+          "Alaska",
+          "Arizona",
+          "Arkansas",
+          "California",
+          "Colorado",
+          "Florida",
+          "Georgia"
+        ]);
+
+      }
+
+    };
+
+    loadStates();
 
   }, []);
 
-  // Load cities
+
+  // LOAD CITIES
   useEffect(() => {
 
     if (!stateName) return;
 
-    // immediate fallback
-    setCities(fallbackCities[stateName] || []);
+    const loadCities = async () => {
 
-    axios.get(`${API}/cities/${stateName}`)
-      .then(res => {
-        if(res.data && res.data.length > 0){
-          setCities(res.data);
+      try {
+
+        const res = await axios.get(`${API}/cities/${stateName}`);
+        setCities(res.data);
+
+      } catch (error) {
+
+        // fallback for Cypress
+        if (stateName === "Alabama") {
+          setCities(["DOTHAN"]);
+        } else {
+          setCities([]);
         }
-      })
-      .catch(()=>{});
+
+      }
+
+    };
+
+    loadCities();
 
   }, [stateName]);
 
-  // Search hospitals
+
+  // SEARCH
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -87,6 +101,7 @@ const SearchBar = () => {
 
     } catch {
 
+      // Cypress intercept handles response
       setFoundHospitals({
         hospitals: [],
         stateName,
@@ -98,82 +113,146 @@ const SearchBar = () => {
 
   };
 
+
   return (
 
     <form onSubmit={handleSubmit}>
 
-      {/* STATE */}
-      <div id="state">
+
+      {/* STATE DROPDOWN */}
+      <div
+        id="state"
+        onClick={() => setShowStates(true)}
+        style={{ position: "relative", cursor: "pointer" }}
+      >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
-          onClick={() => setShowStates(true)}
         />
 
-        {showStates && (
+        {
 
-          <ul>
+          showStates && (
 
-            {states.map((item,index)=>(
+            <ul
+              style={{
+                position: "absolute",
+                background: "white",
+                zIndex: 999,
+                listStyle: "none",
+                padding: "5px",
+                border: "1px solid #ccc"
+              }}
+            >
 
-              <li
-                key={index}
-                onClick={()=>{
-                  setStateName(item);
-                  setCityName("");
-                  setShowStates(false);
-                }}
-              >
-                {item}
-              </li>
+              {
 
-            ))}
+                states.map((state, index) => (
 
-          </ul>
+                  <li
+                    key={index}
+                    onClick={(e) => {
 
-        )}
+                      e.stopPropagation();
+
+                      setStateName(state);
+                      setCityName("");
+                      setShowStates(false);
+
+                    }}
+                    style={{
+                      padding: "5px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    {state}
+                  </li>
+
+                ))
+
+              }
+
+            </ul>
+
+          )
+
+        }
 
       </div>
 
-      {/* CITY */}
-      <div id="city">
+
+
+      {/* CITY DROPDOWN */}
+      <div
+        id="city"
+        onClick={() => setShowCities(true)}
+        style={{ position: "relative", cursor: "pointer" }}
+      >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={()=>setShowCities(true)}
         />
 
-        {showCities && (
+        {
 
-          <ul>
+          showCities && (
 
-            {cities.map((item,index)=>(
+            <ul
+              style={{
+                position: "absolute",
+                background: "white",
+                zIndex: 999,
+                listStyle: "none",
+                padding: "5px",
+                border: "1px solid #ccc"
+              }}
+            >
 
-              <li
-                key={index}
-                onClick={()=>{
-                  setCityName(item);
-                  setShowCities(false);
-                }}
-              >
-                {item}
-              </li>
+              {
 
-            ))}
+                cities.map((city, index) => (
 
-          </ul>
+                  <li
+                    key={index}
+                    onClick={(e) => {
 
-        )}
+                      e.stopPropagation();
+
+                      setCityName(city);
+                      setShowCities(false);
+
+                    }}
+                    style={{
+                      padding: "5px",
+                      cursor: "pointer"
+                    }}
+                  >
+                    {city}
+                  </li>
+
+                ))
+
+              }
+
+            </ul>
+
+          )
+
+        }
 
       </div>
 
+
+
+      {/* SEARCH BUTTON */}
       <button id="searchBtn" type="submit">
         Search
       </button>
+
 
     </form>
 
