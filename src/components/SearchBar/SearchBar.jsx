@@ -17,23 +17,36 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-  // Load states
+  // ✅ load states immediately
   useEffect(() => {
+
     axios.get(`${API}/states`)
-      .then(res => setStates(res.data))
-      .catch(() => {});
+      .then(res => {
+        setStates(res.data || []);
+      })
+      .catch(() => {
+        setStates([]);
+      });
+
   }, []);
 
-  // Load cities
+  // ✅ load cities when state selected
   useEffect(() => {
-    if(stateName){
-      axios.get(`${API}/cities/${stateName}`)
-        .then(res => setCities(res.data))
-        .catch(() => {});
-    }
+
+    if(!stateName) return;
+
+    axios.get(`${API}/cities/${stateName}`)
+      .then(res => {
+        setCities(res.data || []);
+      })
+      .catch(() => {
+        setCities([]);
+      });
+
   }, [stateName]);
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     if(!stateName || !cityName) return;
@@ -48,6 +61,7 @@ const SearchBar = () => {
       cityName,
       noSearchYet: false
     });
+
   };
 
   return (
@@ -57,8 +71,8 @@ const SearchBar = () => {
       {/* STATE */}
       <div
         id="state"
-        style={{ position: "relative", cursor: "pointer" }}
         onClick={() => setShowStates(true)}
+        style={{ position: "relative" }}
       >
 
         <input
@@ -67,23 +81,26 @@ const SearchBar = () => {
           readOnly
         />
 
+        {/* ALWAYS render UL when clicked */}
         {showStates && (
           <ul style={{
             position: "absolute",
             background: "white",
             zIndex: 999,
-            width: "100%"
+            width: "100%",
+            maxHeight: "200px",
+            overflowY: "auto"
           }}>
-            {states.map((item, index) => (
+            {states.map((state, index) => (
               <li
                 key={index}
-                style={{ cursor: "pointer", padding: "5px" }}
                 onClick={() => {
-                  setStateName(item);
+                  setStateName(state);
                   setShowStates(false);
                 }}
+                style={{ padding: "6px", cursor: "pointer" }}
               >
-                {item}
+                {state}
               </li>
             ))}
           </ul>
@@ -94,8 +111,8 @@ const SearchBar = () => {
       {/* CITY */}
       <div
         id="city"
-        style={{ position: "relative", cursor: "pointer" }}
         onClick={() => setShowCities(true)}
+        style={{ position: "relative" }}
       >
 
         <input
@@ -109,18 +126,20 @@ const SearchBar = () => {
             position: "absolute",
             background: "white",
             zIndex: 999,
-            width: "100%"
+            width: "100%",
+            maxHeight: "200px",
+            overflowY: "auto"
           }}>
-            {cities.map((item, index) => (
+            {cities.map((city, index) => (
               <li
                 key={index}
-                style={{ cursor: "pointer", padding: "5px" }}
                 onClick={() => {
-                  setCityName(item);
+                  setCityName(city);
                   setShowCities(false);
                 }}
+                style={{ padding: "6px", cursor: "pointer" }}
               >
-                {item}
+                {city}
               </li>
             ))}
           </ul>
