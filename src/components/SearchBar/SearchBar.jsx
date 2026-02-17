@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import SearchPop from "./SearchPop";
 import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
@@ -20,31 +19,24 @@ const SearchBar = () => {
 
   // Load states
   useEffect(() => {
-
     axios.get(`${API}/states`)
-      .then(res => {
-        setStates(res.data);
-      });
-
+      .then(res => setStates(res.data))
+      .catch(() => {});
   }, []);
 
   // Load cities
   useEffect(() => {
-
     if(stateName){
-
       axios.get(`${API}/cities/${stateName}`)
-        .then(res => {
-          setCities(res.data);
-        });
-
+        .then(res => setCities(res.data))
+        .catch(() => {});
     }
-
   }, [stateName]);
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
+
+    if(!stateName || !cityName) return;
 
     const res = await axios.get(
       `${API}/data?state=${stateName}&city=${cityName}`
@@ -56,7 +48,6 @@ const SearchBar = () => {
       cityName,
       noSearchYet: false
     });
-
   };
 
   return (
@@ -66,28 +57,27 @@ const SearchBar = () => {
       {/* STATE */}
       <div
         id="state"
-        style={{ position: "relative" }}
+        style={{ position: "relative", cursor: "pointer" }}
+        onClick={() => setShowStates(true)}
       >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
-          onClick={() => setShowStates(true)}
         />
 
         {showStates && (
-
           <ul style={{
             position: "absolute",
             background: "white",
-            zIndex: 999
+            zIndex: 999,
+            width: "100%"
           }}>
-
             {states.map((item, index) => (
-
               <li
                 key={index}
+                style={{ cursor: "pointer", padding: "5px" }}
                 onClick={() => {
                   setStateName(item);
                   setShowStates(false);
@@ -95,11 +85,8 @@ const SearchBar = () => {
               >
                 {item}
               </li>
-
             ))}
-
           </ul>
-
         )}
 
       </div>
@@ -107,28 +94,27 @@ const SearchBar = () => {
       {/* CITY */}
       <div
         id="city"
-        style={{ position: "relative" }}
+        style={{ position: "relative", cursor: "pointer" }}
+        onClick={() => setShowCities(true)}
       >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => setShowCities(true)}
         />
 
         {showCities && (
-
           <ul style={{
             position: "absolute",
             background: "white",
-            zIndex: 999
+            zIndex: 999,
+            width: "100%"
           }}>
-
             {cities.map((item, index) => (
-
               <li
                 key={index}
+                style={{ cursor: "pointer", padding: "5px" }}
                 onClick={() => {
                   setCityName(item);
                   setShowCities(false);
@@ -136,11 +122,8 @@ const SearchBar = () => {
               >
                 {item}
               </li>
-
             ))}
-
           </ul>
-
         )}
 
       </div>
