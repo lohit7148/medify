@@ -57,7 +57,11 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      <div id="state" onClick={()=>setShowStates(true)}>
+      {/* STATE DROPDOWN */}
+      <div
+        id="state"
+        onClick={() => setShowStates(true)}
+      >
 
         <input
           value={stateName}
@@ -66,7 +70,6 @@ const SearchBar = () => {
         />
 
         {showStates && (
-
           <SearchPop
             locations={states}
             clickFunction={(state)=>{
@@ -74,12 +77,15 @@ const SearchBar = () => {
               setShowStates(false);
             }}
           />
-
         )}
 
       </div>
 
-      <div id="city" onClick={()=>setShowCities(true)}>
+      {/* CITY DROPDOWN */}
+      <div
+        id="city"
+        onClick={() => setShowCities(true)}
+      >
 
         <input
           value={cityName}
@@ -88,7 +94,6 @@ const SearchBar = () => {
         />
 
         {showCities && (
-
           <SearchPop
             locations={cities}
             clickFunction={(city)=>{
@@ -96,12 +101,14 @@ const SearchBar = () => {
               setShowCities(false);
             }}
           />
-
         )}
 
       </div>
 
-      <button id="searchBtn" type="submit">
+      <button
+        id="searchBtn"
+        type="submit"
+      >
         Search
       </button>
 
