@@ -18,21 +18,25 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
+  // Load states
   useEffect(() => {
 
     axios.get(`${API}/states`)
-      .then(res => setStates(res.data))
-      .catch(() => {});
+      .then(res => {
+        setStates(res.data);
+      });
 
   }, []);
 
+  // Load cities
   useEffect(() => {
 
     if(stateName){
 
       axios.get(`${API}/cities/${stateName}`)
-        .then(res => setCities(res.data))
-        .catch(() => {});
+        .then(res => {
+          setCities(res.data);
+        });
 
     }
 
@@ -43,7 +47,7 @@ const SearchBar = () => {
     e.preventDefault();
 
     const res = await axios.get(
-      `${API}/data?state=${stateName}&city=${cityName.toUpperCase()}`
+      `${API}/data?state=${stateName}&city=${cityName}`
     );
 
     setFoundHospitals({
@@ -59,45 +63,83 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      <div id="state" onClick={() => setShowStates(true)}>
+      {/* STATE */}
+      <div
+        id="state"
+        style={{ position: "relative" }}
+      >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
+          onClick={() => setShowStates(true)}
         />
 
         {showStates && (
 
-          <SearchPop
-            locations={states}
-            clickFunction={(state) => {
-              setStateName(state);
-              setShowStates(false);
-            }}
-          />
+          <ul style={{
+            position: "absolute",
+            background: "white",
+            zIndex: 999
+          }}>
+
+            {states.map((item, index) => (
+
+              <li
+                key={index}
+                onClick={() => {
+                  setStateName(item);
+                  setShowStates(false);
+                }}
+              >
+                {item}
+              </li>
+
+            ))}
+
+          </ul>
 
         )}
 
       </div>
 
-      <div id="city" onClick={() => setShowCities(true)}>
+      {/* CITY */}
+      <div
+        id="city"
+        style={{ position: "relative" }}
+      >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
+          onClick={() => setShowCities(true)}
         />
 
         {showCities && (
 
-          <SearchPop
-            locations={cities}
-            clickFunction={(city) => {
-              setCityName(city.toUpperCase());
-              setShowCities(false);
-            }}
-          />
+          <ul style={{
+            position: "absolute",
+            background: "white",
+            zIndex: 999
+          }}>
+
+            {cities.map((item, index) => (
+
+              <li
+                key={index}
+                onClick={() => {
+                  setCityName(item);
+                  setShowCities(false);
+                }}
+              >
+                {item}
+              </li>
+
+            ))}
+
+          </ul>
 
         )}
 
