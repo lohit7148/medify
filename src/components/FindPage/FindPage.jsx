@@ -1,5 +1,4 @@
 import React from 'react';
-//components
 import SearchResults from '../SearchResults/SearchResults';
 import FAQ from '../FAQ/FAQ';
 import AppTop from '../AppTop/AppTop';
@@ -10,9 +9,7 @@ const FindPage = () => {
         <>
             <AppTop />  
             <Navbar atFindPage={true} backColor="whiteBack" />
-
             <SearchResults />
-
             <FAQ />
         </>
     );
