@@ -4,21 +4,6 @@ import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
 
-// fallback states for Cypress (CRITICAL FIX)
-const fallbackStates = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California"
-];
-
-// fallback cities for Cypress
-const fallbackCities = {
-  Alabama: ["DOTHAN", "BIRMINGHAM"],
-  Alaska: ["ANCHORAGE"],
-};
-
 const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
@@ -37,58 +22,51 @@ const SearchBar = () => {
 
     axios.get(`${API}/states`)
       .then(res => {
-
-        if(res.data?.length > 0)
-          setStates(res.data);
-        else
-          setStates(fallbackStates);
-
+        setStates(res.data);
       })
-      .catch(() => {
-
-        // use fallback if API slow / fails
-        setStates(fallbackStates);
-
-      });
+      .catch(err => console.log(err));
 
   }, []);
 
-  // Load cities
+  // Load cities when state selected
   useEffect(() => {
 
-    if(!stateName) return;
+    if (stateName) {
 
-    axios.get(`${API}/cities/${stateName}`)
-      .then(res => {
-
-        if(res.data?.length > 0)
+      axios.get(`${API}/cities/${stateName}`)
+        .then(res => {
           setCities(res.data);
-        else
-          setCities(fallbackCities[stateName] || []);
+        })
+        .catch(err => console.log(err));
 
-      })
-      .catch(() => {
-
-        setCities(fallbackCities[stateName] || []);
-
-      });
+    }
 
   }, [stateName]);
 
+  // Submit search
   const handleSubmit = async (e) => {
 
     e.preventDefault();
 
-    const res = await axios.get(
-      `${API}/data?state=${stateName}&city=${cityName}`
-    );
+    if (!stateName || !cityName) return;
 
-    setFoundHospitals({
-      hospitals: res.data,
-      stateName,
-      cityName,
-      noSearchYet: false
-    });
+    try {
+
+      const res = await axios.get(
+        `${API}/data?state=${stateName}&city=${cityName}`
+      );
+
+      setFoundHospitals({
+        hospitals: res.data,
+        stateName,
+        cityName,
+        noSearchYet: false
+      });
+
+    }
+    catch (err) {
+      console.log(err);
+    }
 
   };
 
@@ -96,35 +74,48 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      {/* STATE */}
-      <div id="state" style={{ position: "relative" }}>
+      {/* STATE DROPDOWN */}
+      <div
+        id="state"
+        style={{ position: "relative", width: "200px", marginBottom: "10px" }}
+      >
 
         <input
+          type="text"
           value={stateName}
           placeholder="State"
           readOnly
           onClick={() => setShowStates(true)}
+          style={{ width: "100%", padding: "8px", cursor: "pointer" }}
         />
 
         {showStates && (
 
           <ul style={{
-            position: "absolute",
+            listStyle: "none",
+            margin: 0,
+            padding: 0,
             background: "white",
-            zIndex: 999,
-            border: "1px solid #ccc"
+            border: "1px solid #ccc",
+            position: "absolute",
+            width: "100%",
+            maxHeight: "200px",
+            overflowY: "auto",
+            zIndex: 999
           }}>
 
             {states.map((item, index) => (
 
               <li
                 key={index}
-                style={{ padding: "8px", cursor: "pointer" }}
+                style={{
+                  padding: "8px",
+                  cursor: "pointer"
+                }}
                 onClick={() => {
-
                   setStateName(item);
                   setShowStates(false);
-
+                  setCityName("");
                 }}
               >
                 {item}
@@ -138,36 +129,49 @@ const SearchBar = () => {
 
       </div>
 
-
-      {/* CITY */}
-      <div id="city" style={{ position: "relative" }}>
+      {/* CITY DROPDOWN */}
+      <div
+        id="city"
+        style={{ position: "relative", width: "200px", marginBottom: "10px" }}
+      >
 
         <input
+          type="text"
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => setShowCities(true)}
+          onClick={() => {
+            if (stateName) setShowCities(true);
+          }}
+          style={{ width: "100%", padding: "8px", cursor: "pointer" }}
         />
 
         {showCities && (
 
           <ul style={{
-            position: "absolute",
+            listStyle: "none",
+            margin: 0,
+            padding: 0,
             background: "white",
-            zIndex: 999,
-            border: "1px solid #ccc"
+            border: "1px solid #ccc",
+            position: "absolute",
+            width: "100%",
+            maxHeight: "200px",
+            overflowY: "auto",
+            zIndex: 999
           }}>
 
             {cities.map((item, index) => (
 
               <li
                 key={index}
-                style={{ padding: "8px", cursor: "pointer" }}
+                style={{
+                  padding: "8px",
+                  cursor: "pointer"
+                }}
                 onClick={() => {
-
                   setCityName(item);
                   setShowCities(false);
-
                 }}
               >
                 {item}
@@ -181,8 +185,15 @@ const SearchBar = () => {
 
       </div>
 
-
-      <button id="searchBtn" type="submit">
+      {/* SEARCH BUTTON */}
+      <button
+        id="searchBtn"
+        type="submit"
+        style={{
+          padding: "10px 20px",
+          cursor: "pointer"
+        }}
+      >
         Search
       </button>
 
