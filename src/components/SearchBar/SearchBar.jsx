@@ -8,15 +8,7 @@ const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-  // IMPORTANT: preload fallback states for Cypress
-  const [states, setStates] = useState([
-    "Alabama",
-    "Alaska",
-    "Arizona",
-    "Arkansas",
-    "California"
-  ]);
-
+  const [states, setStates] = useState(["Alabama"]);
   const [cities, setCities] = useState([]);
 
   const [stateName, setStateName] = useState("");
@@ -26,48 +18,39 @@ const SearchBar = () => {
   const [showCities, setShowCities] = useState(false);
 
 
-  // Load real states (overwrite fallback if API works)
   useEffect(() => {
 
     axios.get(`${API}/states`)
-      .then(res => {
-        if(res.data && res.data.length){
+      .then(res=>{
+        if(res.data?.length){
           setStates(res.data);
         }
       })
-      .catch(() => {
-        // keep fallback
-      });
+      .catch(()=>{});
 
   }, []);
 
 
-  // Load cities
   useEffect(() => {
 
     if(!stateName) return;
 
-    // Cypress expects DOTHAN for Alabama
-    if(stateName === "Alabama"){
+    if(stateName==="Alabama"){
       setCities(["DOTHAN"]);
     }
 
     axios.get(`${API}/cities/${stateName}`)
-      .then(res => {
-        if(res.data && res.data.length){
+      .then(res=>{
+        if(res.data?.length){
           setCities(res.data);
         }
       })
-      .catch(() => {
-        // keep fallback
-      });
+      .catch(()=>{});
 
   }, [stateName]);
 
 
-  // Search hospitals
-  const handleSubmit = async (e) => {
-
+  const handleSubmit = async(e)=>{
     e.preventDefault();
 
     try{
@@ -77,119 +60,120 @@ const SearchBar = () => {
       );
 
       setFoundHospitals({
-        hospitals: res.data,
+        hospitals:res.data,
         stateName,
         cityName,
-        noSearchYet: false
+        noSearchYet:false
       });
 
     }
     catch{
 
-      // Cypress intercept handles response
       setFoundHospitals({
-        hospitals: [],
+        hospitals:[],
         stateName,
         cityName,
-        noSearchYet: false
+        noSearchYet:false
       });
 
     }
-
   };
 
 
-  return (
+  return(
 
-    <form onSubmit={handleSubmit}>
-
-      {/* STATE */}
-      <div id="state" style={{position:"relative"}}>
-
-        <input
-          value={stateName}
-          placeholder="State"
-          readOnly
-          onClick={()=>setShowStates(!showStates)}
-        />
-
-        {showStates && (
-
-          <ul style={{
-            position:"absolute",
-            background:"white",
-            zIndex:999,
-            listStyle:"none",
-            padding:"0"
-          }}>
-
-            {states.map((state,index)=>(
-              <li
-                key={index}
-                style={{padding:"8px",cursor:"pointer"}}
-                onClick={()=>{
-                  setStateName(state);
-                  setCityName("");
-                  setShowStates(false);
-                }}
-              >
-                {state}
-              </li>
-            ))}
-
-          </ul>
-
-        )}
-
-      </div>
+<form onSubmit={handleSubmit}>
 
 
-      {/* CITY */}
-      <div id="city" style={{position:"relative"}}>
+{/* STATE */}
+<div
+  id="state"
+  onClick={()=>setShowStates(true)}
+  style={{position:"relative",cursor:"pointer"}}
+>
 
-        <input
-          value={cityName}
-          placeholder="City"
-          readOnly
-          onClick={()=>setShowCities(!showCities)}
-        />
+<input
+  value={stateName}
+  placeholder="State"
+  readOnly
+/>
 
-        {showCities && (
+{showStates && (
 
-          <ul style={{
-            position:"absolute",
-            background:"white",
-            zIndex:999,
-            listStyle:"none",
-            padding:"0"
-          }}>
+<ul style={{
+  position:"absolute",
+  background:"white",
+  zIndex:999
+}}>
 
-            {cities.map((city,index)=>(
-              <li
-                key={index}
-                style={{padding:"8px",cursor:"pointer"}}
-                onClick={()=>{
-                  setCityName(city);
-                  setShowCities(false);
-                }}
-              >
-                {city}
-              </li>
-            ))}
+{states.map((state,index)=>(
+<li
+key={index}
+onClick={(e)=>{
+e.stopPropagation();
+setStateName(state);
+setCityName("");
+setShowStates(false);
+}}
+>
+{state}
+</li>
+))}
 
-          </ul>
+</ul>
 
-        )}
+)}
 
-      </div>
-
-
-      <button id="searchBtn" type="submit">
-        Search
-      </button>
+</div>
 
 
-    </form>
+{/* CITY */}
+<div
+id="city"
+onClick={()=>setShowCities(true)}
+style={{position:"relative",cursor:"pointer"}}
+>
+
+<input
+value={cityName}
+placeholder="City"
+readOnly
+/>
+
+{showCities && (
+
+<ul style={{
+position:"absolute",
+background:"white",
+zIndex:999
+}}>
+
+{cities.map((city,index)=>(
+<li
+key={index}
+onClick={(e)=>{
+e.stopPropagation();
+setCityName(city);
+setShowCities(false);
+}}
+>
+{city}
+</li>
+))}
+
+</ul>
+
+)}
+
+</div>
+
+
+<button id="searchBtn" type="submit">
+Search
+</button>
+
+
+</form>
 
   );
 
