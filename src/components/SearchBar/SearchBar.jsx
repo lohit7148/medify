@@ -18,35 +18,19 @@ const SearchBar = () => {
   const [showStates, setShowStates] = useState(false);
   const [showCities, setShowCities] = useState(false);
 
-  // LOAD STATES IMMEDIATELY
   useEffect(() => {
 
-    const loadStates = async () => {
-
-      const res = await axios.get(`${API}/states`);
-
-      setStates(res.data);
-
-    };
-
-    loadStates();
+    axios.get(`${API}/states`)
+      .then(res => setStates(res.data));
 
   }, []);
 
-  // LOAD CITIES
   useEffect(() => {
 
     if(stateName){
 
-      const loadCities = async () => {
-
-        const res = await axios.get(`${API}/cities/${stateName}`);
-
-        setCities(res.data);
-
-      };
-
-      loadCities();
+      axios.get(`${API}/cities/${stateName}`)
+        .then(res => setCities(res.data));
 
     }
 
@@ -73,14 +57,15 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      {/* STATE */}
-      <div id="state">
+      <div
+        id="state"
+        onClick={() => setShowStates(true)}
+      >
 
         <input
           value={stateName}
           placeholder="State"
           readOnly
-          onClick={() => setShowStates(true)}
         />
 
         {showStates && (
@@ -97,14 +82,15 @@ const SearchBar = () => {
 
       </div>
 
-      {/* CITY */}
-      <div id="city">
+      <div
+        id="city"
+        onClick={() => setShowCities(true)}
+      >
 
         <input
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => setShowCities(true)}
         />
 
         {showCities && (
