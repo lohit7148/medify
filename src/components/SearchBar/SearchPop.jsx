@@ -2,13 +2,13 @@ import React from "react";
 
 const SearchPop = ({ locations, clickFunction }) => {
 
-  if(!locations) return null;
+  if(!locations || locations.length === 0) return null;
 
   return (
 
     <ul>
 
-      {locations.map((item,index) => (
+      {locations.map((item, index) => (
 
         <li
           key={index}

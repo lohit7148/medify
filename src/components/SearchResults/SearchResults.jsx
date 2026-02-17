@@ -1,78 +1,90 @@
 import React, { useContext } from 'react';
 import "./SearchResults.css";
 import checkIcon from "../../assets/checkBadge.svg"
-import CommonSubText from "../CommonSubText/CommonSubText";
 import ResultCard from '../ResultCard/ResultCard';
 import { FoundHospitalsContext } from '../../contexts/AllContexts';
 
-const headline0 = "Search with State and City name for Hospitals above"
+const headline0 = "Search with State and City name for Hospitals above";
 const subText = "Book appointments with minimum wait-time & verified doctor details";
 
 const SearchResults = () => {
-    
-    const [foundHospitals, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-    const displayCards = () => {
+  const [foundHospitals] = useContext(FoundHospitalsContext);
 
-        if(!foundHospitals) return null;
+  const displayCards = () => {
 
-        if(foundHospitals?.hospitals?.length === 0) return null;
+    if(!foundHospitals?.hospitals?.length) return null;
 
-        return foundHospitals.hospitals.map((item, index) => {
+    return foundHospitals.hospitals.map((item,index) => (
 
-            return (
-                <ResultCard 
-                    key={index}
-                    hospitalName={item["Hospital Name"]}
-                    county={item["County Name"]}
-                    city={item["City"]}
-                    rating={item["Hospital overall rating"]}
-                    hospitalType={item["Hospital Type"]}
-                />
-            )
-        });
-    }
+      <ResultCard
+        key={index}
+        hospitalName={item["Hospital Name"]}
+        county={item["County Name"]}
+        city={item["City"]}
+        rating={item["Hospital overall rating"]}
+        hospitalType={item["Hospital Type"]}
+      />
 
-    return (
-        <div className='SearchResults' >
+    ));
 
-            <div className='commonContainer resultsBody'>
+  };
 
-                <div className='resultsHead'>
+  return (
 
-                    {
-                        foundHospitals.noSearchYet ? (
-                            <h1>{headline0}</h1>
-                        ) : (
-                            <h1>
-                                {foundHospitals?.hospitals?.length} medical centers available in {foundHospitals?.cityName?.toLowerCase()}
-                            </h1>
-                        )
-                    }
+    <div className='SearchResults'>
 
-                    <p>
-                        <img src={checkIcon} alt='check icon' className='checkIcon'/>
-                        <span>{subText}</span>
-                    </p>
+      <div className='commonContainer resultsBody'>
 
-                </div>
+        <div className='resultsHead'>
 
-                <div className='cardAndSensodyne'>
+          {
 
-                    <aside className='resultCardsArray'>
+            foundHospitals.noSearchYet
+            ?
 
-                        {displayCards()}
+            <h1>{headline0}</h1>
 
-                    </aside>
+            :
 
-                    <aside className='sensodyne'></aside>
+            <h1>
+              {foundHospitals.hospitals.length}
+              {" "}
+              medical centers available in
+              {" "}
+              {foundHospitals.cityName.toLowerCase()}
+            </h1>
 
-                </div>
+          }
 
-            </div>
+          <p>
+
+            <img src={checkIcon} alt="" />
+
+            <span>{subText}</span>
+
+          </p>
 
         </div>
-    );
+
+        <div className='cardAndSensodyne'>
+
+          <aside className='resultCardsArray'>
+
+            {displayCards()}
+
+          </aside>
+
+          <aside className='sensodyne'></aside>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
+
 };
 
 export default SearchResults;

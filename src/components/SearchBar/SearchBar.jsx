@@ -5,24 +5,11 @@ import { FoundHospitalsContext } from "../../contexts/AllContexts";
 
 const API = "https://meddata-backend.onrender.com";
 
-const fallbackStates = [
-  "Alabama","Alaska","Arizona","Arkansas","California","Colorado",
-  "Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho",
-  "Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana",
-  "Maine","Maryland","Massachusetts","Michigan","Minnesota",
-  "Mississippi","Missouri","Montana","Nebraska","Nevada",
-  "New Hampshire","New Jersey","New Mexico","New York",
-  "North Carolina","North Dakota","Ohio","Oklahoma","Oregon",
-  "Pennsylvania","Rhode Island","South Carolina","South Dakota",
-  "Tennessee","Texas","Utah","Vermont","Virginia","Washington",
-  "West Virginia","Wisconsin","Wyoming"
-];
-
 const SearchBar = () => {
 
   const [, setFoundHospitals] = useContext(FoundHospitalsContext);
 
-  const [states, setStates] = useState(fallbackStates);
+  const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
   const [stateName, setStateName] = useState("");
@@ -35,7 +22,7 @@ const SearchBar = () => {
 
     axios.get(`${API}/states`)
       .then(res => setStates(res.data))
-      .catch(()=>{}); // fallback remains
+      .catch(() => {});
 
   }, []);
 
@@ -44,7 +31,8 @@ const SearchBar = () => {
     if(stateName){
 
       axios.get(`${API}/cities/${stateName}`)
-        .then(res => setCities(res.data));
+        .then(res => setCities(res.data))
+        .catch(() => {});
 
     }
 
@@ -55,14 +43,14 @@ const SearchBar = () => {
     e.preventDefault();
 
     const res = await axios.get(
-      `${API}/data?state=${stateName}&city=${cityName}`
+      `${API}/data?state=${stateName}&city=${cityName.toUpperCase()}`
     );
 
     setFoundHospitals({
       hospitals: res.data,
       stateName,
       cityName,
-      noSearchYet:false
+      noSearchYet: false
     });
 
   };
@@ -71,7 +59,7 @@ const SearchBar = () => {
 
     <form onSubmit={handleSubmit}>
 
-      <div id="state" onClick={()=>setShowStates(true)}>
+      <div id="state" onClick={() => setShowStates(true)}>
 
         <input
           value={stateName}
@@ -83,7 +71,7 @@ const SearchBar = () => {
 
           <SearchPop
             locations={states}
-            clickFunction={(state)=>{
+            clickFunction={(state) => {
               setStateName(state);
               setShowStates(false);
             }}
@@ -93,7 +81,7 @@ const SearchBar = () => {
 
       </div>
 
-      <div id="city" onClick={()=>setShowCities(true)}>
+      <div id="city" onClick={() => setShowCities(true)}>
 
         <input
           value={cityName}
@@ -105,8 +93,8 @@ const SearchBar = () => {
 
           <SearchPop
             locations={cities}
-            clickFunction={(city)=>{
-              setCityName(city);
+            clickFunction={(city) => {
+              setCityName(city.toUpperCase());
               setShowCities(false);
             }}
           />
