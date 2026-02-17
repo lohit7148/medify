@@ -19,28 +19,18 @@ const SearchBar = () => {
 
   // Load states
   useEffect(() => {
-
     axios.get(`${API}/states`)
-      .then(res => {
-        setStates(res.data);
-      })
-      .catch(err => console.log(err));
-
+      .then(res => setStates(res.data))
+      .catch(() => {});
   }, []);
 
-  // Load cities when state selected
+  // Load cities
   useEffect(() => {
-
-    if (stateName) {
-
+    if(stateName){
       axios.get(`${API}/cities/${stateName}`)
-        .then(res => {
-          setCities(res.data);
-        })
-        .catch(err => console.log(err));
-
+        .then(res => setCities(res.data))
+        .catch(() => {});
     }
-
   }, [stateName]);
 
   // Submit search
@@ -48,25 +38,18 @@ const SearchBar = () => {
 
     e.preventDefault();
 
-    if (!stateName || !cityName) return;
+    if(!stateName || !cityName) return;
 
-    try {
+    const res = await axios.get(
+      `${API}/data?state=${stateName}&city=${cityName}`
+    );
 
-      const res = await axios.get(
-        `${API}/data?state=${stateName}&city=${cityName}`
-      );
-
-      setFoundHospitals({
-        hospitals: res.data,
-        stateName,
-        cityName,
-        noSearchYet: false
-      });
-
-    }
-    catch (err) {
-      console.log(err);
-    }
+    setFoundHospitals({
+      hospitals: res.data,
+      stateName,
+      cityName,
+      noSearchYet: false
+    });
 
   };
 
@@ -75,43 +58,30 @@ const SearchBar = () => {
     <form onSubmit={handleSubmit}>
 
       {/* STATE DROPDOWN */}
-      <div
-        id="state"
-        style={{ position: "relative", width: "200px", marginBottom: "10px" }}
-      >
+      <div id="state" style={{ position: "relative" }}>
 
         <input
-          type="text"
           value={stateName}
           placeholder="State"
           readOnly
           onClick={() => setShowStates(true)}
-          style={{ width: "100%", padding: "8px", cursor: "pointer" }}
         />
 
         {showStates && (
-
           <ul style={{
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            background: "white",
-            border: "1px solid #ccc",
             position: "absolute",
+            background: "white",
+            zIndex: 999,
+            listStyle: "none",
+            padding: "0",
+            margin: "0",
             width: "100%",
-            maxHeight: "200px",
-            overflowY: "auto",
-            zIndex: 999
+            border: "1px solid #ccc"
           }}>
-
             {states.map((item, index) => (
-
               <li
                 key={index}
-                style={{
-                  padding: "8px",
-                  cursor: "pointer"
-                }}
+                style={{ padding: "8px", cursor: "pointer" }}
                 onClick={() => {
                   setStateName(item);
                   setShowStates(false);
@@ -120,55 +90,38 @@ const SearchBar = () => {
               >
                 {item}
               </li>
-
             ))}
-
           </ul>
-
         )}
 
       </div>
 
+
       {/* CITY DROPDOWN */}
-      <div
-        id="city"
-        style={{ position: "relative", width: "200px", marginBottom: "10px" }}
-      >
+      <div id="city" style={{ position: "relative", marginTop: "10px" }}>
 
         <input
-          type="text"
           value={cityName}
           placeholder="City"
           readOnly
-          onClick={() => {
-            if (stateName) setShowCities(true);
-          }}
-          style={{ width: "100%", padding: "8px", cursor: "pointer" }}
+          onClick={() => stateName && setShowCities(true)}
         />
 
         {showCities && (
-
           <ul style={{
-            listStyle: "none",
-            margin: 0,
-            padding: 0,
-            background: "white",
-            border: "1px solid #ccc",
             position: "absolute",
+            background: "white",
+            zIndex: 999,
+            listStyle: "none",
+            padding: "0",
+            margin: "0",
             width: "100%",
-            maxHeight: "200px",
-            overflowY: "auto",
-            zIndex: 999
+            border: "1px solid #ccc"
           }}>
-
             {cities.map((item, index) => (
-
               <li
                 key={index}
-                style={{
-                  padding: "8px",
-                  cursor: "pointer"
-                }}
+                style={{ padding: "8px", cursor: "pointer" }}
                 onClick={() => {
                   setCityName(item);
                   setShowCities(false);
@@ -176,29 +129,18 @@ const SearchBar = () => {
               >
                 {item}
               </li>
-
             ))}
-
           </ul>
-
         )}
 
       </div>
 
-      {/* SEARCH BUTTON */}
-      <button
-        id="searchBtn"
-        type="submit"
-        style={{
-          padding: "10px 20px",
-          cursor: "pointer"
-        }}
-      >
+
+      <button id="searchBtn" type="submit">
         Search
       </button>
 
     </form>
-
   );
 
 };
