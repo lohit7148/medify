@@ -1,73 +1,55 @@
-import React, { useContext, useEffect } from 'react';
-import "./Bookings.css";
-import { BookingsContext } from '../../contexts/AllContexts';
+import React,{useContext,useEffect} from 'react';
+import {BookingsContext} from '../../contexts/AllContexts';
 import ResultCard from '../ResultCard/ResultCard';
 
-const Bookings = () => {
+const Bookings=()=>{
 
-    const [bookings, setBookings] = useContext(BookingsContext);
+    const [bookings,setBookings]=useContext(BookingsContext);
 
-    const displayCards = () => {
+    useEffect(()=>{
 
-        if(!bookings || bookings.length === 0) return null;
+        const saved=
 
-        return bookings.map((item, index) => {
+            JSON.parse(localStorage.getItem("bookings"))||[];
 
-            return (
-                <ResultCard 
-                    key={index}
+        setBookings(saved);
+
+    },[]);
+
+    return(
+
+        <div>
+
+            {bookings.map((item,i)=>(
+
+                <ResultCard
+
+                    key={i}
+
                     hospitalName={item.hospitalName}
+
                     county={item.county}
+
                     city={item.city}
+
                     rating={item.rating}
+
                     hospitalType={item.hospitalType}
+
                     atBookingsPage={true}
+
                     bookedDate={item.dateTime.date}
+
                     bookedTime={item.dateTime.time}
+
                 />
-            )
-        });
-    }
 
-    useEffect(() => {
-
-        const localBookings = localStorage.getItem("bookings");
-
-        if(localBookings){
-
-            setBookings(JSON.parse(localBookings));
-
-        }
-
-    }, []);
-
-    return (
-
-        <div className='SearchResults' >
-
-            <div className='commonContainer resultsBody'>
-
-                <div className='resultsHead'>
-                    <h5></h5>
-                    <p></p>
-                </div>
-
-                <div className='cardAndSensodyne'>
-
-                    <aside className='resultCardsArray'>
-
-                        {displayCards()}
-
-                    </aside>
-
-                    <aside className='sensodyne'></aside>
-
-                </div>
-
-            </div>
+            ))}
 
         </div>
-    );
-};
 
-export default Bookings;
+    )
+
+}
+
+export default Bookings

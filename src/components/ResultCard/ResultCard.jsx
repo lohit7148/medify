@@ -2,43 +2,58 @@ import React, { useContext, useState } from 'react';
 import "./ResultCard.css";
 import hospitalImg from "../../assets/hospitalCircle.svg";
 import likeIcon from "../../assets/like.svg";
-import Button from '../Button/Button';
 import Slots from '../Slots/Slots';
 import { BookingsContext } from '../../contexts/AllContexts';
 
-const resultCardOffer = "Consultation fee at clinic";
-
 const ResultCard = props => {
 
-    const { hospitalName, county, city, rating, hospitalType, atBookingsPage, bookedDate, bookedTime } = props;
+    const {
 
-    const [bookings, setBookings] = useContext(BookingsContext)
+        hospitalName,
 
-    const [dateTime, setDateTime] = useState({date: "", time: ""});
+        county,
 
-    const [slotsON, setSlotsON] = useState(false);
+        city,
 
-    const handleCardClick = () => {
+        rating,
 
-        if(atBookingsPage) return;
+        hospitalType,
 
-        setSlotsON(!slotsON)
-    };
+        atBookingsPage,
 
-    const handleButton = () => {
+        bookedDate,
 
-        if(atBookingsPage) return;
+        bookedTime
 
-        if(!slotsON) return setSlotsON(true);
+    } = props;
 
-        if(!dateTime.date.length || !dateTime.time.length){
+    const [bookings,setBookings]=useContext(BookingsContext);
 
-            return alert("Select Slot Date to book.");
+    const [dateTime,setDateTime]=useState({date:"",time:""});
+
+    const [slotsON,setSlotsON]=useState(false);
+
+    const handleBooking=()=>{
+
+        if(atBookingsPage)return;
+
+        if(!slotsON){
+
+            setSlotsON(true);
+
+            return;
+
         }
 
-        let saveBookings = [...bookings, {
+        if(!dateTime.date||!dateTime.time){
 
-            dateTime,
+            alert("Select Slot");
+
+            return;
+
+        }
+
+        const newBooking={
 
             hospitalName,
 
@@ -48,104 +63,80 @@ const ResultCard = props => {
 
             rating,
 
-            hospitalType
+            hospitalType,
 
-        }]
+            dateTime
 
-        localStorage.setItem("bookings", JSON.stringify(saveBookings))
+        };
 
-        setBookings(saveBookings);
+        const existing=
 
-        alert("New Booking Created!");
-    }
+            JSON.parse(localStorage.getItem("bookings"))||[];
 
-    const displayRightSideOfCard = () => {
+        const updated=[...existing,newBooking];
 
-        if(atBookingsPage){
+        localStorage.setItem(
 
-            return(
+            "bookings",
 
-                <div className='resultContent-right resultContent-top'>
+            JSON.stringify(updated)
 
-                    <Button text={bookedTime} buttonClass={`smallButton blueButton-outlined`}/>
+        );
 
-                    <Button text={bookedDate} buttonClass={`smallButton greenButton-outlined`}/>
+        setBookings(updated);
 
-                </div>
+    };
 
-            )
-        }
+    return(
 
-        return (
+        <div>
 
-            <div className='resultContent-right'>
+            <h3>{hospitalName}</h3>
 
-                <span className='available'>Available Today</span>
+            <p>{county},{city}</p>
 
-                <Button clickFuntion={handleButton} buttonClass={"bookingButton longButton"} text={"Book FREE Center Visit"}/>
+            <p>{rating}</p>
 
-            </div>
+            {!atBookingsPage&&(
 
-        )
-    }
+                <button onClick={handleBooking}>
 
-    const slotClick = (date, time) => {
+                    Book FREE Center Visit
 
-        setDateTime({time, date});
-    }
+                </button>
 
-    return (
+            )}
 
-        <div className='ResultCardWrapper'>
+            {atBookingsPage&&(
 
-            <div className='ResultCard' onClick={handleCardClick}>
+                <>
 
-                <div className='resultCardImageWrapper'>
+                    <p>{bookedDate}</p>
 
-                    <img src={hospitalImg} alt="hospital icon" />
+                    <p>{bookedTime}</p>
 
-                </div>
+                </>
 
-                <div className='resultCardContent'>
+            )}
 
-                    <div className='resultContent-left'>
+            <Slots
 
-                        <h3 className='resultCardTitle'>{hospitalName}</h3>
+                slotsON={slotsON}
 
-                        <div className='resultLocation'>
+                slotClick={(date,time)=>
 
-                            <span className='resultCity'>{`${county}, ${city}`}</span>
+                    setDateTime({date,time})
 
-                            <span className='resultCardSubtext'>{hospitalType}</span>
+                }
 
-                            <span className='resultCardSubtext'>more</span>
+                dateTime={dateTime}
 
-                        </div>
-
-                        <div className='resultCardOfferLine'>
-
-                            <span className='FREE'>FREE</span>
-
-                            <span className='strikeThrough'>₹500</span>
-
-                            <span>{resultCardOffer}</span>
-
-                        </div>
-
-                        <Button buttonClass={"smallButton greenButton rating"} text={rating} icon={likeIcon} />
-
-                    </div>
-
-                    {displayRightSideOfCard()}
-
-                </div>
-
-            </div>
-
-            <Slots dateTime={dateTime} slotsON={slotsON} slotClick={slotClick}/>
+            />
 
         </div>
-    );
-};
 
-export default ResultCard;
+    )
+
+}
+
+export default ResultCard
